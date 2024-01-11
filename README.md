@@ -46,7 +46,7 @@ const result = calc(42);
 //         Result<number, DivideByZeroError | NegativeNumberError>
 ```
 
-If you're using a formatter like `dprint`, you can wrap the `try(...)` call with parentheses to prevent it from adding an extra indentation to the function body:
+If you're using a formatter like `dprint`, you can wrap the `$try(...)` call with parentheses to prevent it from adding an extra indentation to the function body:
 
 ```typescript
 import { $try, err, type TryOk } from 'errok';
