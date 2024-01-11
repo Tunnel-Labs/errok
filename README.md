@@ -42,7 +42,8 @@ export const calc = (n: number) =>
 
 
 const result = calc(42);
-//    ^? - TypeScript will automatically infer the type Result<number, DivideByZeroError | NegativeNumberError>
+//    ^? - TypeScript will automatically infer the correct type:
+//         Result<number, DivideByZeroError | NegativeNumberError>
 ```
 
 If you're using a formatter like `dprint`, you can wrap the `try(...)` call with parentheses to prevent it from adding an extra indentation to the function body:
