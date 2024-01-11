@@ -31,7 +31,7 @@ function divide(a: number, b: number) {
 }
 
 export const calc = (n: number) =>
-  $try(async function*() {
+  $try(function*() {
     if (n < 0) {
       return err(new NegativeNumberError());
     }
@@ -51,7 +51,7 @@ If you're using a formatter like `dprint`, you can wrap the `$try(...)` call wit
 ```typescript
 import { $try, err, type TryOk } from 'errok';
 
-export const calc = (n: number) => ($try(async function*(
+export const calc = (n: number) => ($try(function*(
   // You can optionally specify a `$ok` parameter to enforce the return type
   $ok: TryOk<number>,
 ) {
