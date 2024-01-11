@@ -17,7 +17,7 @@ For asynchronous tasks, `errok` offers a `ResultAsync` class which wraps a `Prom
 errok provides a special `$try` function that allows you to ergonomically return from a function if it encounters an error. It's similar to [Rust's `?` operator](https://doc.rust-lang.org/reference/expressions/operator-expr.html#the-question-mark-operator) or [Zig's `try` expression](https://ziglang.org/documentation/master/#try):
 
 ```typescript
-import { $try, err, type TryOk } from 'errok';
+import { $try, err, ok } from 'errok';
 
 class DivideByZeroError extends Error {}
 class NegativeNumberError extends Error {}
@@ -31,16 +31,13 @@ function divide(a: number, b: number) {
 }
 
 export const calc = (n: number) =>
-  $try(async function*(
-    // You can optionally specify a `$ok` parameter to enforce the return type
-    $ok: TryOk<number>,
-  ) {
+  $try(async function*() {
     if (n < 0) {
-      return err(NegativeNumberError);
+      return err(new NegativeNumberError());
     }
 
     const quotient = yield* divide(1, n).safeUnwrap();
-    return $ok(quotient);
+    return ok(quotient);
   });
 
 
@@ -51,12 +48,14 @@ const result = calc(42);
 If you're using a formatter like `dprint`, you can wrap the `try(...)` call with parentheses to prevent it from adding an extra indentation to the function body:
 
 ```typescript
+import { $try, err, type TryOk } from 'errok';
+
 export const calc = (n: number) => ($try(async function*(
   // You can optionally specify a `$ok` parameter to enforce the return type
   $ok: TryOk<number>,
 ) {
   if (n < 0) {
-    return err(NegativeNumberError);
+    return err(new NegativeNumberError());
   }
 
   const quotient = yield* divide(1, n).safeUnwrap();
