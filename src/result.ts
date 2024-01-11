@@ -75,7 +75,10 @@ export namespace Result {
 
 export type Result<T, E> = Ok<T, E> | Err<T, E>;
 
-export const ok = <T, E = never>(value: T): Ok<T, E> => new Ok(value);
+export const ok: {
+	<T, E = never>(value: T): Ok<T, E>
+	<T extends undefined, E = never>(): Ok<T, E>
+} = (value?: any) => new Ok(value);
 
 export const err = <T = never, E = unknown>(err: E): Err<T, E> => new Err(err);
 
@@ -145,7 +148,8 @@ export function $try(
 			$err: <E>(error: E) => Err<never, E>,
 		) => AsyncGenerator<Err<never, unknown>, Result<unknown, unknown>>),
 ): any {
-	const n = body(ok, err).next();
+	// TODO: fix this type
+	const n = body(ok as any, err).next();
 	if (n instanceof Promise) {
 		return new ResultAsync(n.then((r) => r.value));
 	}
