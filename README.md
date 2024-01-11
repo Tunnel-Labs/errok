@@ -1,6 +1,6 @@
 # errok
 
-> This project is a modification of @supermacro's amazing [neverthrow](https://github.com/Tunnel-Labs/errok) library
+> This project is a modification of @supermacro's amazing [neverthrow](https://github.com/Tunnel-Labs/errok) library.
 
 ## Description
 
@@ -10,9 +10,61 @@ This package contains a `Result` type that represents either success (`Ok`) or f
 
 For asynchronous tasks, `errok` offers a `ResultAsync` class which wraps a `Promise<Result<T, E>>` and gives you the same level of expressivity and control as a regular `Result<T, E>`.
 
-`ResultAsync` is `thenable` meaning it **behaves exactly like a native `Promise<Result>`** ... except you have access to the same methods that `Result` provides without having to `await` or `.then` the promise! Check out [the wiki](https://github.com/Tunnel-Labs/errok/wiki/Basic-Usage-Examples#asynchronous-api) for examples and best practices.
+`ResultAsync` is `thenable` meaning it **behaves exactly like a native `Promise<Result>`** ... except you have access to the same methods that `Result` provides without having to `await` or `.then` the promise!
 
-> Need to see real-life examples of how to leverage this package for error handling? See this repo: https://github.com/parlez-vous/server
+### $try
+
+errok provides a special `$try` function that allows you to ergonomically return from a function if it encounters an error. It's similar to [Rust's `?` operator](https://doc.rust-lang.org/reference/expressions/operator-expr.html#the-question-mark-operator) or [Zig's `try` expression](https://ziglang.org/documentation/master/#try):
+
+```typescript
+import { $try, err, type TryOk } from 'errok';
+
+class DivideByZeroError extends Error {}
+class NegativeNumberError extends Error {}
+
+function divide(a: number, b: number) {
+  if (b === 0) {
+    return err(new DivideByZeroError());
+  }
+
+  return ok(a / b);
+}
+
+export const calc = (n: number) =>
+  $try(async function*(
+    // You can optionally specify a `$ok` parameter to enforce the return type
+    $ok: TryOk<number>,
+  ) {
+    if (n < 0) {
+      return err(NegativeNumberError);
+    }
+
+    const quotient = yield* divide(1, n).safeUnwrap();
+    return $ok(quotient);
+  });
+
+
+const result = calc(42);
+//    ^? - TypeScript will automatically infer the type Result<number, DivideByZeroError | NegativeNumberError>
+```
+
+If you're using a formatter like `dprint`, you can wrap the `try(...)` call with parentheses to prevent it from adding an extra indentation to the function body:
+
+```typescript
+export const calc = (n: number) => ($try(async function*(
+  // You can optionally specify a `$ok` parameter to enforce the return type
+  $ok: TryOk<number>,
+) {
+  if (n < 0) {
+    return err(NegativeNumberError);
+  }
+
+  const quotient = yield* divide(1, n).safeUnwrap();
+  return $ok(quotient);
+}));
+```
+
+> Unfortunately, as far as I'm aware, there's no way to configure Prettier to format in a way that avoids the extra indentation layer.
 
 <div id="toc"></div>
 
@@ -20,6 +72,7 @@ For asynchronous tasks, `errok` offers a `ResultAsync` class which wraps a `Prom
 
 - [errok](#errok)
   - [Description](#description)
+    - [$try](#try)
   - [Table Of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Recommended: Use `eslint-plugin-errok`](#recommended-use-eslint-plugin-errok)
@@ -60,7 +113,7 @@ For asynchronous tasks, `errok` offers a `ResultAsync` class which wraps a `Prom
       - [`fromThrowable`](#fromthrowable)
       - [`fromPromise`](#frompromise)
       - [`fromSafePromise`](#fromsafepromise)
-      - [`$try`](#try)
+      - [`$try`](#try-1)
     - [Testing](#testing)
 
 ## Installation
@@ -106,18 +159,18 @@ This plugin is essentially a porting of Rust's [`must-use`](https://doc.rust-lan
 
 ```typescript
 import {
-	$try,
-	Err,
-	err,
-	errAsync,
-	fromPromise,
-	fromSafePromise,
-	fromThrowable,
-	Ok,
-	ok,
-	okAsync,
-	Result,
-	ResultAsync,
+  $try,
+  Err,
+  err,
+  errAsync,
+  fromPromise,
+  fromSafePromise,
+  fromThrowable,
+  Ok,
+  ok,
+  okAsync,
+  Result,
+  ResultAsync,
 } from 'errok';
 ```
 
@@ -239,7 +292,7 @@ const linesResult = getLines('1\n2\n3\n4\n');
 
 // this Result now has a Array<number> inside it
 const newResult = linesResult.map(
-	(arr: Array<string>) => arr.map(parseInt),
+  (arr: Array<string>) => arr.map(parseInt),
 );
 
 newResult.isOk(); // true
@@ -275,9 +328,9 @@ const rawHeaders = 'nonsensical gibberish and badly formatted stuff';
 const parseResult = parseHeaders(rawHeaders);
 
 parseResult.mapErr((parseError) => {
-	res.status(400).json({
-		error: parseError,
-	});
+  res.status(400).json({
+    error: parseError,
+  });
 });
 
 parseResult.isErr(); // true
@@ -344,20 +397,20 @@ import { err, ok } from 'errok';
 const sq = (n: number): Result<number, number> => ok(n ** 2);
 
 ok(2)
-	.andThen(sq)
-	.andThen(sq); // Ok(16)
+  .andThen(sq)
+  .andThen(sq); // Ok(16)
 
 ok(2)
-	.andThen(sq)
-	.andThen(err); // Err(4)
+  .andThen(sq)
+  .andThen(err); // Err(4)
 
 ok(2)
-	.andThen(err)
-	.andThen(sq); // Err(2)
+  .andThen(err)
+  .andThen(sq); // Err(2)
 
 err(3)
-	.andThen(sq)
-	.andThen(sq); // Err(3)
+  .andThen(sq)
+  .andThen(sq); // Err(3)
 ```
 
 **Example 2: Flattening Nested Results**
@@ -412,25 +465,25 @@ class Result<T, E> {
 
 ```typescript
 enum DatabaseError {
-	PoolExhausted = 'PoolExhausted',
-	NotFound = 'NotFound',
+  PoolExhausted = 'PoolExhausted',
+  NotFound = 'NotFound',
 }
 
 const dbQueryResult: Result<string, DatabaseError> = err(
-	DatabaseError.NotFound,
+  DatabaseError.NotFound,
 );
 
 const updatedQueryResult = dbQueryResult.orElse((dbError) =>
-	dbError === DatabaseError.NotFound ?
-		ok('User does not exist') // error recovery branch: ok() must be called with a value of type string
-		 :
-		//
-		//
-		// err() can be called with a value of any new type that you want
-		// it could also be called with the same error value
-		//
-		//     err(dbError)
-		err(500)
+  dbError === DatabaseError.NotFound ?
+    ok('User does not exist') // error recovery branch: ok() must be called with a value of type string
+     :
+    //
+    //
+    // err() can be called with a value of any new type that you want
+    // it could also be called with the same error value
+    //
+    //     err(dbError)
+    err(500)
 );
 ```
 
@@ -479,13 +532,13 @@ computationThatMightFail().match(console.log, console.error);
 
 // Returning values
 const attempt = computationThatMightFail()
-	.map((str) => str.toUpperCase())
-	.mapErr((err) => `Error: ${err}`);
+  .map((str) => str.toUpperCase())
+  .mapErr((err) => `Error: ${err}`);
 // `attempt` is of type `Result<string, string>`
 
 const answer = computationThatMightFail().match(
-	(str) => str.toUpperCase(),
-	(err) => `Error: ${err}`,
+  (str) => str.toUpperCase(),
+  (err) => `Error: ${err}`,
 );
 // `answer` is of type `string`
 ```
@@ -494,14 +547,14 @@ If you don't use the error parameter in your match callback then `match` is equi
 
 ```ts
 const answer = computationThatMightFail().match(
-	(str) => str.toUpperCase(),
-	() => 'ComputationError',
+  (str) => str.toUpperCase(),
+  () => 'ComputationError',
 );
 // `answer` is of type `string`
 
 const answer = computationThatMightFail()
-	.map((str) => str.toUpperCase())
-	.unwrapOr('ComputationError');
+  .map((str) => str.toUpperCase())
+  .unwrapOr('ComputationError');
 ```
 
 [⬆️ Back to top](#toc)
@@ -535,8 +588,8 @@ import { parseHeaders } from 'imaginary-http-parser';
 // parseHeaders(raw: string): Result<SomeKeyValueMap, ParseError>
 
 const asyncRes = parseHeaders(rawHeader)
-	.map((headerKvMap) => headerKvMap.Authorization)
-	.asyncMap(findUserInDatabase);
+  .map((headerKvMap) => headerKvMap.Authorization)
+  .asyncMap(findUserInDatabase);
 ```
 
 Note that in the above example if `parseHeaders` returns an `Err` then `.map` and `.asyncMap` will not be invoked, and `asyncRes` variable will resolve to an `Err` when turned into a `Result` using `await` or `.then()`.
@@ -620,12 +673,12 @@ Example with tuples:
 const tuple = <T extends any[]>(...args: T): T => args;
 
 const resultTuple: [Result<string, never>, Result<string, never>] = tuple(
-	ok('a'),
-	ok('b'),
+  ok('a'),
+  ok('b'),
 );
 
 const combinedTuple: Result<[string, string], unknown> = Result.combine(
-	resultTuple,
+  resultTuple,
 );
 ```
 
@@ -658,10 +711,10 @@ Example usage:
 
 ```typescript
 const resultList: Result<number, string>[] = [
-	ok(123),
-	err('boooom!'),
-	ok(456),
-	err('ahhhhh!'),
+  ok(123),
+  err('boooom!'),
+  ok(456),
+  err('ahhhhh!'),
 ];
 
 const result = Result.combineWithAllErrors(resultList);
@@ -765,8 +818,8 @@ import { insertIntoDb } from 'imaginary-database';
 // insertIntoDb(user: User): Promise<User>
 
 const res = ResultAsync.fromPromise(
-	insertIntoDb(myUser),
-	() => new Error('Database error'),
+  insertIntoDb(myUser),
+  () => new Error('Database error'),
 );
 // `res` has a type of ResultAsync<User, Error>
 ```
@@ -798,21 +851,21 @@ import { RouteError } from 'routes/error';
 // simulate slow routes in an http server that works in a Result / ResultAsync context
 // Adopted from https://github.com/parlez-vous/server/blob/2496bacf55a2acbebc30631b5562f34272794d76/src/routes/common/signup.ts
 export const slowDown = <T>(ms: number) => (value: T) =>
-	ResultAsync.fromSafePromise<T, RouteError>(
-		new Promise((resolve) => {
-			setTimeout(() => {
-				resolve(value);
-			}, ms);
-		}),
-	);
+  ResultAsync.fromSafePromise<T, RouteError>(
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(value);
+      }, ms);
+    }),
+  );
 
 export const signupHandler = route<User>((req, sessionManager) =>
-	decode(userSignupDecoder, req.body, 'Invalid request body').map((parsed) => {
-		return createUser(parsed)
-			.andThen(slowDown(3000)) // slowdown by 3 seconds
-			.andThen(sessionManager.createSession)
-			.map(({ sessionToken, admin }) => AppData.init(admin, sessionToken));
-	})
+  decode(userSignupDecoder, req.body, 'Invalid request body').map((parsed) => {
+    return createUser(parsed)
+      .andThen(slowDown(3000)) // slowdown by 3 seconds
+      .andThen(sessionManager.createSession)
+      .map(({ sessionToken, admin }) => AppData.init(admin, sessionToken));
+  })
 );
 ```
 
@@ -849,17 +902,17 @@ const usersInCanada = findUsersIn('Canada');
 
 // Let's assume we only need their names
 const namesInCanada = usersInCanada.map((users: Array<User>) =>
-	users.map((user) => user.name)
+  users.map((user) => user.name)
 );
 // namesInCanada is of type ResultAsync<Array<string>, Error>
 
 // We can extract the Result using .then() or await
 namesInCanada.then((namesResult: Result<Array<string>, Error>) => {
-	if (namesResult.isErr()) {
-		console.log("Couldn't get the users from the database", namesResult.error);
-	} else {
-		console.log('Users in Canada are named: ' + namesResult.value.join(','));
-	}
+  if (namesResult.isErr()) {
+    console.log("Couldn't get the users from the database", namesResult.error);
+  } else {
+    console.log('Users in Canada are named: ' + namesResult.value.join(','));
+  }
 });
 ```
 
@@ -894,26 +947,26 @@ import { findUsersIn } from 'imaginary-database';
 
 // Let's say we need to low-level errors from findUsersIn to be more readable
 const usersInCanada = findUsersIn('Canada').mapErr((error: Error) => {
-	// The only error we want to pass to the user is "Unknown country"
-	if (error.message === 'Unknown country') {
-		return error.message;
-	}
-	// All other errors will be labelled as a system error
-	return 'System error, please contact an administrator.';
+  // The only error we want to pass to the user is "Unknown country"
+  if (error.message === 'Unknown country') {
+    return error.message;
+  }
+  // All other errors will be labelled as a system error
+  return 'System error, please contact an administrator.';
 });
 
 // usersInCanada is of type ResultAsync<Array<User>, string>
 
 usersInCanada.then((usersResult: Result<Array<User>, string>) => {
-	if (usersResult.isErr()) {
-		res.status(400).json({
-			error: usersResult.error,
-		});
-	} else {
-		res.status(200).json({
-			users: usersResult.value,
-		});
-	}
+  if (usersResult.isErr()) {
+    res.status(400).json({
+      error: usersResult.error,
+    });
+  } else {
+    res.status(200).json({
+      users: usersResult.value,
+    });
+  }
 });
 ```
 
@@ -982,17 +1035,17 @@ import { validateUser } from 'imaginary-validator';
 // sendNotification(user): ResultAsync<void, Error>
 
 const resAsync = validateUser(user)
-	.andThen(insertUser)
-	.andThen(sendNotification);
+  .andThen(insertUser)
+  .andThen(sendNotification);
 
 // resAsync is a ResultAsync<void, Error>
 
 resAsync.then((res: Result<void, Error>) => {
-	if (res.isErr()) {
-		console.log('Oops, at least one step failed', res.error);
-	} else {
-		console.log('User has been validated, inserted and notified successfully.');
-	}
+  if (res.isErr()) {
+    console.log('Oops, at least one step failed', res.error);
+  } else {
+    console.log('User has been validated, inserted and notified successfully.');
+  }
 });
 ```
 
@@ -1047,11 +1100,11 @@ import { validateUser } from 'imaginary-validator';
 
 // Handle both cases at the end of the chain using match
 const resultMessage = await validateUser(user)
-	.andThen(insertUser)
-	.match(
-		(user: User) => `User ${user.name} has been successfully created`,
-		(error: Error) => `User could not be created because ${error.message}`,
-	);
+  .andThen(insertUser)
+  .match(
+    (user: User) => `User ${user.name} has been successfully created`,
+    (error: Error) => `User could not be created because ${error.message}`,
+  );
 
 // resultMessage is a string
 ```
@@ -1091,7 +1144,7 @@ Example:
 const resultList: ResultAsync<number, never>[] = [okAsync(1), okAsync(2)];
 
 const combinedList: ResultAsync<number[], unknown> = ResultAsync.combine(
-	resultList,
+  resultList,
 );
 ```
 
@@ -1102,10 +1155,10 @@ Example with tuples:
 const tuple = <T extends any[]>(...args: T): T => args;
 
 const resultTuple: [ResultAsync<string, never>, ResultAsync<string, never>] =
-	tuple(okAsync('a'), okAsync('b'));
+  tuple(okAsync('a'), okAsync('b'));
 
 const combinedTuple: ResultAsync<[string, string], unknown> = ResultAsync
-	.combine(resultTuple);
+  .combine(resultTuple);
 ```
 
 [⬆️ Back to top](#toc)
@@ -1135,10 +1188,10 @@ Example usage:
 
 ```typescript
 const resultList: ResultAsync<number, string>[] = [
-	okAsync(123),
-	errAsync('boooom!'),
-	okAsync(456),
-	errAsync('ahhhhh!'),
+  okAsync(123),
+  errAsync('boooom!'),
+  okAsync(456),
+  errAsync('ahhhhh!'),
 ];
 
 const result = ResultAsync.combineWithAllErrors(resultList);
@@ -1190,22 +1243,22 @@ declare function mayFail1(): Result<number, string>;
 declare function mayFail2(): Result<number, string>;
 
 function myFunc(): Result<number, string> {
-	// We have to define a constant to hold the result to check and unwrap its value.
-	const result1 = mayFail1();
-	if (result1.isErr()) {
-		return err(`aborted by an error from 1st function, ${result1.error}`);
-	}
-	const value1 = result1.value;
+  // We have to define a constant to hold the result to check and unwrap its value.
+  const result1 = mayFail1();
+  if (result1.isErr()) {
+    return err(`aborted by an error from 1st function, ${result1.error}`);
+  }
+  const value1 = result1.value;
 
-	// Again, we need to define a constant and then check and unwrap.
-	const result2 = mayFail2();
-	if (result2.isErr()) {
-		return err(`aborted by an error from 2nd function, ${result2.error}`);
-	}
-	const value2 = result2.value;
+  // Again, we need to define a constant and then check and unwrap.
+  const result2 = mayFail2();
+  if (result2.isErr()) {
+    return err(`aborted by an error from 2nd function, ${result2.error}`);
+  }
+  const value2 = result2.value;
 
-	// And finally we return what we want to calculate
-	return ok(value1 + value2);
+  // And finally we return what we want to calculate
+  return ok(value1 + value2);
 }
 ```
 
@@ -1218,20 +1271,20 @@ declare function mayFail1(): Result<number, string>;
 declare function mayFail2(): Result<number, string>;
 
 function myFunc(): Result<number, string> {
-	return $try<number, string>(function*() {
-		return ok(
-			// If the result of mayFail1().mapErr() is an `Err`, the evaluation is
-			// aborted here and the enclosing `$try` block is evaluated to that `Err`.
-			// Otherwise, this `(yield* ...)` is evaluated to its `.value`.
-			(yield* mayFail1()
-				.mapErr((e) => `aborted by an error from 1st function, ${e}`)
-				.safeUnwrap()) +
-				// The same as above.
-				(yield* mayFail2()
-					.mapErr((e) => `aborted by an error from 2nd function, ${e}`)
-					.safeUnwrap()),
-		);
-	});
+  return $try<number, string>(function*() {
+    return ok(
+      // If the result of mayFail1().mapErr() is an `Err`, the evaluation is
+      // aborted here and the enclosing `$try` block is evaluated to that `Err`.
+      // Otherwise, this `(yield* ...)` is evaluated to its `.value`.
+      (yield* mayFail1()
+        .mapErr((e) => `aborted by an error from 1st function, ${e}`)
+        .safeUnwrap()) +
+        // The same as above.
+        (yield* mayFail2()
+          .mapErr((e) => `aborted by an error from 2nd function, ${e}`)
+          .safeUnwrap()),
+    );
+  });
 }
 ```
 
@@ -1249,18 +1302,18 @@ declare function mayFail1(): Promise<Result<number, string>>;
 declare function mayFail2(): ResultAsync<number, string>;
 
 function myFunc(): Promise<Result<number, string>> {
-	return $try<number, string>(async function*() {
-		return ok(
-			// You have to await if the expression is Promise<Result>
-			(yield* (await mayFail1())
-				.mapErr((e) => `aborted by an error from 1st function, ${e}`)
-				.safeUnwrap()) +
-				// You can call `safeUnwrap` directly if its ResultAsync
-				(yield* mayFail2()
-					.mapErr((e) => `aborted by an error from 2nd function, ${e}`)
-					.safeUnwrap()),
-		);
-	});
+  return $try<number, string>(async function*() {
+    return ok(
+      // You have to await if the expression is Promise<Result>
+      (yield* (await mayFail1())
+        .mapErr((e) => `aborted by an error from 1st function, ${e}`)
+        .safeUnwrap()) +
+        // You can call `safeUnwrap` directly if its ResultAsync
+        (yield* mayFail2()
+          .mapErr((e) => `aborted by an error from 2nd function, ${e}`)
+          .safeUnwrap()),
+    );
+  });
 }
 ```
 
@@ -1292,7 +1345,7 @@ import { ok } from 'errok';
 // ...
 
 expect(callSomeFunctionThatReturnsAResult('with', 'some', 'args')).toEqual(
-	ok(someExpectation),
+  ok(someExpectation),
 );
 ```
 
@@ -1300,7 +1353,7 @@ By default, the thrown value does not contain a stack trace. This is because sta
 
 ```typescript
 _unsafeUnwrapErr({
-	withStackTrace: true,
+  withStackTrace: true,
 });
 
 // ^ Now the error object will have a `.stack` property containing the current stack
