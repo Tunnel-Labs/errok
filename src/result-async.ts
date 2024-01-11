@@ -5,19 +5,23 @@ import type {
   IsLiteralArray,
   MemberListOf,
   MembersToUnion,
+	Traverse,
 } from './result'
 
-import { Err, Ok, Result } from './'
+import { Err, Ok, Result } from './index'
 import {
   combineResultAsyncList,
   combineResultAsyncListWithAllErrors,
   ExtractErrAsyncTypes,
+  ExtractErrTypes,
   ExtractOkAsyncTypes,
+  ExtractOkTypes,
   InferAsyncErrTypes,
   InferAsyncOkTypes,
   InferErrTypes,
   InferOkTypes,
 } from './_internals/utils'
+
 
 export class ResultAsync<T, E> implements PromiseLike<Result<T, E>> {
   private _promise: Promise<Result<T, E>>
@@ -25,6 +29,16 @@ export class ResultAsync<T, E> implements PromiseLike<Result<T, E>> {
   constructor(res: Promise<Result<T, E>>) {
     this._promise = res
   }
+
+	static fromFunction<T, E>(asyncFunction: () => Promise<Result<T, E>>): ResultAsync<T, E> {
+		return new ResultAsync(asyncFunction());
+	}
+
+	static combinePromises<T extends readonly Promise<Result<unknown, unknown>>[]>(promises: T): CombineResultsAsync<{ [idx in keyof T]: Awaited<T[idx]> }> {
+		return ResultAsync.fromFunction(
+			async () => ResultAsync.combine(await Promise.all(promises) as any)
+		) as any;
+	}
 
   static fromSafePromise<T, E = never>(promise: PromiseLike<T>): ResultAsync<T, E>
   static fromSafePromise<T, E = never>(promise: Promise<T>): ResultAsync<T, E> {
@@ -138,11 +152,15 @@ export class ResultAsync<T, E> implements PromiseLike<Result<T, E>> {
   }
 
   /**
-   * Emulates Rust's `?` operator in `safeTry`'s body. See also `safeTry`.
+   * Emulates Rust's `?` operator in `$try`'s body. See also `$try`.
    */
   async *safeUnwrap(): AsyncGenerator<Err<never, E>, T> {
     return yield* await this._promise.then((res) => res.safeUnwrap())
   }
+
+	async _unsafeUnwrap() {
+		return this._promise.then((res) => res._unsafeUnwrap());
+	}
 
   // Makes ResultAsync implement PromiseLike<Result>
   then<A, B>(
@@ -168,6 +186,8 @@ export type CombineResultAsyncs<
 > = IsLiteralArray<T> extends 1
   ? TraverseAsync<UnwrapAsync<T>>
   : ResultAsync<ExtractOkAsyncTypes<T>, ExtractErrAsyncTypes<T>[number]>
+
+export type CombineResultsAsync<T extends readonly Result<unknown, unknown>[]> = IsLiteralArray<T> extends 1 ? Traverse<T> : ResultAsync<ExtractOkTypes<T>, ExtractErrTypes<T>[number]>;
 
 // Combines the array of async results into one result with all errors.
 export type CombineResultsWithAllErrorsArrayAsync<

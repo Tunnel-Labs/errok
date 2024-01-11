@@ -1,5 +1,5 @@
 import {
-  safeTry,
+  $try,
   ok,
   okAsync,
   err,
@@ -14,7 +14,7 @@ describe('Returns what is returned from the generator function', () => {
   const val = "value"
 
   test("With synchronous Ok", () => {
-    const res = safeTry(function*() {
+    const res = $try(function*() {
       return ok(val)
     })
     expect(res).toBeInstanceOf(Ok)
@@ -22,7 +22,7 @@ describe('Returns what is returned from the generator function', () => {
   })
 
   test("With synchronous Err", () => {
-    const res = safeTry(function*() {
+    const res = $try(function*() {
       return err(val)
     })
     expect(res).toBeInstanceOf(Err)
@@ -30,7 +30,7 @@ describe('Returns what is returned from the generator function', () => {
   })
 
   test("With async Ok", async () => {
-    const res = await safeTry(async function*() {
+    const res = await $try(async function*() {
       return await okAsync(val)
     })
     expect(res).toBeInstanceOf(Ok)
@@ -38,7 +38,7 @@ describe('Returns what is returned from the generator function', () => {
   })
 
   test("With async Err", async () => {
-    const res = await safeTry(async function*() {
+    const res = await $try(async function*() {
       return await errAsync(val)
     })
     expect(res).toBeInstanceOf(Err)
@@ -51,7 +51,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
     const errVal = "err"
     const okValues = Array<string>()
 
-    const result = safeTry(function*() {
+    const result = $try(function*() {
       const okFoo = yield* ok("foo").safeUnwrap()
       okValues.push(okFoo)
 
@@ -73,7 +73,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
     const errVal = "err"
     const okValues = Array<string>()
 
-    const result = await safeTry(async function*() {
+    const result = await $try(async function*() {
       const okFoo = yield* okAsync("foo").safeUnwrap()
       okValues.push(okFoo)
 
@@ -95,7 +95,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
     const errVal = "err"
     const okValues = Array<string>()
 
-    const result = await safeTry(async function*() {
+    const result = await $try(async function*() {
       const okFoo = yield* okAsync("foo").safeUnwrap()
       okValues.push(okFoo)
 
@@ -138,7 +138,7 @@ describe("Tests if README's examples work", () => {
 
   test("mayFail2 error", () => {
     function myFunc(): Result<number, string> {
-      return safeTry<number, string>(function*() {
+      return $try<number, string>(function*() {
         return ok(
           (yield* good()
             .mapErr(e => `1st, ${e}`)
@@ -158,7 +158,7 @@ describe("Tests if README's examples work", () => {
 
   test("all ok", () => {
     function myFunc(): Result<number, string> {
-      return safeTry<number, string>(function*() {
+      return $try<number, string>(function*() {
         return ok(
           (yield* good()
             .mapErr(e => `1st, ${e}`)
@@ -178,7 +178,7 @@ describe("Tests if README's examples work", () => {
 
   test("async mayFail1 error", async () => {
     function myFunc(): Promise<Result<number, string>> {
-      return safeTry<number, string>(async function*() {
+      return $try<number, string>(async function*() {
         return ok(
           (yield* (await promiseBad())
             .mapErr(e => `1st, ${e}`)
@@ -198,7 +198,7 @@ describe("Tests if README's examples work", () => {
 
   test("async mayFail2 error", async () => {
     function myFunc(): Promise<Result<number, string>> {
-      return safeTry<number, string>(async function*() {
+      return $try<number, string>(async function*() {
         return ok(
           (yield* (await promiseGood())
             .mapErr(e => `1st, ${e}`)
@@ -218,7 +218,7 @@ describe("Tests if README's examples work", () => {
 
   test("promise async all ok", async () => {
     function myFunc(): Promise<Result<number, string>> {
-      return safeTry<number, string>(async function*() {
+      return $try<number, string>(async function*() {
         return ok(
           (yield* (await promiseGood())
             .mapErr(e => `1st, ${e}`)

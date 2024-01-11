@@ -1,4 +1,4 @@
-import { errAsync, ResultAsync } from './'
+import { errAsync, ResultAsync } from './index'
 import { createNeverThrowError, ErrorConfig } from './_internals/error'
 import {
   combineResultList,
@@ -64,26 +64,30 @@ export const ok = <T, E = never>(value: T): Ok<T, E> => new Ok(value)
 
 export const err = <T = never, E = unknown>(err: E): Err<T, E> => new Err(err)
 
+export interface TryUsageError<$Message> { _: $Message };
+
+
 /**
  * Evaluates the given generator to a Result returned or an Err yielded from it,
  * whichever comes first.
  *
  * This function, in combination with `Result.safeUnwrap()`, is intended to emulate
  * Rust's ? operator.
- * See `/tests/safeTry.test.ts` for examples.
+ * See `/tests/$try.test.ts` for examples.
  *
  * @param body - What is evaluated. In body, `yield* result.safeUnwrap()` works as
  * Rust's `result?` expression.
  * @returns The first occurence of either an yielded Err or a returned Result.
  */
-export function safeTry<T, E>(body: () => Generator<Err<never, E>, Result<T, E>>): Result<T, E>
+export function $try<$Generator extends Generator>(body: ($ok: <T>(value: T) => Ok<T, never>, $err: <E>(error: E) => Err<never, E>) => $Generator): $Generator extends Generator<Result<infer $Ok1, infer $Err1>, Result<infer $Ok2, infer $Err2>> ? Result<$Ok1 | $Ok2, $Err1 | $Err2> : TryUsageError<'The generator passed to \`$try\` must only return and yield `Result` types.'>;
+
 /**
  * Evaluates the given generator to a Result returned or an Err yielded from it,
  * whichever comes first.
  *
  * This function, in combination with `Result.safeUnwrap()`, is intended to emulate
  * Rust's ? operator.
- * See `/tests/safeTry.test.ts` for examples.
+ * See `/tests/$try.test.ts` for examples.
  *
  * @param body - What is evaluated. In body, `yield* result.safeUnwrap()` and
  * `yield* resultAsync.safeUnwrap()` work as Rust's `result?` expression.
@@ -92,17 +96,21 @@ export function safeTry<T, E>(body: () => Generator<Err<never, E>, Result<T, E>>
 // NOTE:
 // Since body is potentially throwable because `await` can be used in it,
 // Promise<Result<T, E>>, not ResultAsync<T, E>, is used as the return type.
-export function safeTry<T, E>(
-  body: () => AsyncGenerator<Err<never, E>, Result<T, E>>,
-): Promise<Result<T, E>>
-export function safeTry<T, E>(
+export function $try<$AsyncGenerator extends AsyncGenerator>(body: ($ok: <T>(value: T) => Ok<T, never>, $err: <E>(error: E) => Err<never, E>) => $AsyncGenerator): $AsyncGenerator extends AsyncGenerator<Result<infer $Ok1, infer $Err1>, Result<infer $Ok2, infer $Err2>> ? ResultAsync<$Ok1 | $Ok2, $Err1 | $Err2> : TryUsageError<'The async generator passed to \`$try\` must only yield and return result types.'>;
+export function $try(
   body:
-    | (() => Generator<Err<never, E>, Result<T, E>>)
-    | (() => AsyncGenerator<Err<never, E>, Result<T, E>>),
-): Result<T, E> | Promise<Result<T, E>> {
-  const n = body().next()
+    ((
+			$ok: <T>(value: T) => Ok<T, never>,
+			$err: <E>(error: E) => Err<never, E>
+		) => Generator<Err<never, unknown>, Result<unknown, unknown>>) |
+		((
+			$ok: <T>(value: T) => Ok<T, never>,
+			$err: <E>(error: E) => Err<never, E>
+		) => AsyncGenerator<Err<never, unknown>, Result<unknown, unknown>>),
+): any {
+  const n = body(ok, err).next()
   if (n instanceof Promise) {
-    return n.then((r) => r.value)
+    return new ResultAsync(n.then((r) => r.value))
   }
   return n.value
 }
@@ -214,7 +222,7 @@ interface IResult<T, E> {
   match<A>(ok: (t: T) => A, err: (e: E) => A): A
 
   /**
-   * Emulates Rust's `?` operator in `safeTry`'s body. See also `safeTry`.
+   * Emulates Rust's `?` operator in `$try`'s body. See also `$try`.
    */
   safeUnwrap(): Generator<Err<never, E>, T>
 
@@ -368,12 +376,12 @@ export class Err<T, E> implements IResult<T, E> {
     return (function* () {
       yield err(error)
 
-      throw new Error('Do not use this generator out of `safeTry`')
+      throw new Error('Do not use this generator out of `$try`')
     })()
   }
 
-  _unsafeUnwrap(config?: ErrorConfig): T {
-    throw createNeverThrowError('Called `_unsafeUnwrap` on an Err', this, config)
+  _unsafeUnwrap(_?: ErrorConfig): T {
+		throw this.error;
   }
 
   _unsafeUnwrapErr(_?: ErrorConfig): E {
@@ -556,7 +564,7 @@ export type IsLiteralArray<T> = T extends { length: infer L }
 
 // Traverses an array of results and returns a single result containing
 // the oks and errs union-ed/combined.
-type Traverse<T, Depth extends number = 5> = Combine<T, Depth> extends [infer Oks, infer Errs]
+export type Traverse<T, Depth extends number = 5> = Combine<T, Depth> extends [infer Oks, infer Errs]
   ? Result<EmptyArrayToNever<Oks, 1>, MembersToUnion<Errs>>
   : never
 
@@ -584,3 +592,6 @@ export type CombineResultsWithAllErrorsArray<
   : Result<ExtractOkTypes<T>, ExtractErrTypes<T>[number][]>
 
 //#endregion
+
+export type TryOk<T> = (value: T) => Ok<T, never>;
+export type TryErr<E> = (error: E) => Err<never, E>;

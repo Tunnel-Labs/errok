@@ -23,7 +23,7 @@ interface NeverThrowError<T, E> {
 }
 
 // Custom error object
-// Context / discussion: https://github.com/supermacro/neverthrow/pull/215
+// Context / discussion: https://github.com/Tunnel-Labs/errok/pull/215
 export const createNeverThrowError = <T, E>(
   message: string,
   result: Result<T, E>,

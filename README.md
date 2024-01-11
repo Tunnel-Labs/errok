@@ -1,6 +1,6 @@
-# NeverThrow 🙅
+# errok
 
-[![supermacro](https://circleci.com/gh/supermacro/neverthrow.svg?style=svg)](https://app.circleci.com/pipelines/github/supermacro/neverthrow)
+> This project is a modification of @supermacro's amazing [neverthrow](https://github.com/Tunnel-Labs/errok) library
 
 ## Description
 
@@ -8,9 +8,9 @@ Encode failure into your program.
 
 This package contains a `Result` type that represents either success (`Ok`) or failure (`Err`).
 
-For asynchronous tasks, `neverthrow` offers a `ResultAsync` class which wraps a `Promise<Result<T, E>>` and gives you the same level of expressivity and control as a regular `Result<T, E>`.
+For asynchronous tasks, `errok` offers a `ResultAsync` class which wraps a `Promise<Result<T, E>>` and gives you the same level of expressivity and control as a regular `Result<T, E>`.
 
-`ResultAsync` is `thenable` meaning it **behaves exactly like a native `Promise<Result>`** ... except you have access to the same methods that `Result` provides without having to `await` or `.then` the promise! Check out [the wiki](https://github.com/supermacro/neverthrow/wiki/Basic-Usage-Examples#asynchronous-api) for examples and best practices.
+`ResultAsync` is `thenable` meaning it **behaves exactly like a native `Promise<Result>`** ... except you have access to the same methods that `Result` provides without having to `await` or `.then` the promise! Check out [the wiki](https://github.com/Tunnel-Labs/errok/wiki/Basic-Usage-Examples#asynchronous-api) for examples and best practices.
 
 > Need to see real-life examples of how to leverage this package for error handling? See this repo: https://github.com/parlez-vous/server
 
@@ -18,66 +18,70 @@ For asynchronous tasks, `neverthrow` offers a `ResultAsync` class which wraps a 
 
 ## Table Of Contents
 
-* [Installation](#installation)
-* [Recommended: Use `eslint-plugin-neverthrow`](#recommended-use-eslint-plugin-neverthrow)
-* [Top-Level API](#top-level-api)
-* [API Documentation](#api-documentation)
-  + [Synchronous API (`Result`)](#synchronous-api-result)
-    - [`ok`](#ok)
-    - [`err`](#err)
-    - [`Result.isOk` (method)](#resultisok-method)
-    - [`Result.isErr` (method)](#resultiserr-method)
-    - [`Result.map` (method)](#resultmap-method)
-    - [`Result.mapErr` (method)](#resultmaperr-method)
-    - [`Result.unwrapOr` (method)](#resultunwrapor-method)
-    - [`Result.andThen` (method)](#resultandthen-method)
-    - [`Result.asyncAndThen` (method)](#resultasyncandthen-method)
-    - [`Result.orElse` (method)](#resultorelse-method)
-    - [`Result.match` (method)](#resultmatch-method)
-    - [`Result.asyncMap` (method)](#resultasyncmap-method)
-    - [`Result.fromThrowable` (static class method)](#resultfromthrowable-static-class-method)
-    - [`Result.combine` (static class method)](#resultcombine-static-class-method)
-    - [`Result.combineWithAllErrors` (static class method)](#resultcombinewithallerrors-static-class-method)
-    - [`Result.safeUnwrap()`](#resultsafeunwrap)
-  + [Asynchronous API (`ResultAsync`)](#asynchronous-api-resultasync)
-    - [`okAsync`](#okasync)
-    - [`errAsync`](#errasync)
-    - [`ResultAsync.fromPromise` (static class method)](#resultasyncfrompromise-static-class-method)
-    - [`ResultAsync.fromSafePromise` (static class method)](#resultasyncfromsafepromise-static-class-method)
-    - [`ResultAsync.map` (method)](#resultasyncmap-method)
-    - [`ResultAsync.mapErr` (method)](#resultasyncmaperr-method)
-    - [`ResultAsync.unwrapOr` (method)](#resultasyncunwrapor-method)
-    - [`ResultAsync.andThen` (method)](#resultasyncandthen-method)
-    - [`ResultAsync.orElse` (method)](#resultasyncorelse-method)
-    - [`ResultAsync.match` (method)](#resultasyncmatch-method)
-    - [`ResultAsync.combine` (static class method)](#resultasynccombine-static-class-method)
-    - [`ResultAsync.combineWithAllErrors` (static class method)](#resultasynccombinewithallerrors-static-class-method)
-    - [`ResultAsync.safeUnwrap()`](#resultasyncsafeunwrap)
-  + [Utilities](#utilities)
-    - [`fromThrowable`](#fromthrowable)
-    - [`fromPromise`](#frompromise)
-    - [`fromSafePromise`](#fromsafepromise)
-    - [`safeTry`](#safetry)
-  + [Testing](#testing)
-* [A note on the Package Name](#a-note-on-the-package-name)
+- [errok](#errok)
+  - [Description](#description)
+  - [Table Of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Recommended: Use `eslint-plugin-errok`](#recommended-use-eslint-plugin-errok)
+  - [Top-Level API](#top-level-api)
+  - [API Documentation](#api-documentation)
+    - [Synchronous API (`Result`)](#synchronous-api-result)
+      - [`ok`](#ok)
+      - [`err`](#err)
+      - [`Result.isOk` (method)](#resultisok-method)
+      - [`Result.isErr` (method)](#resultiserr-method)
+      - [`Result.map` (method)](#resultmap-method)
+      - [`Result.mapErr` (method)](#resultmaperr-method)
+      - [`Result.unwrapOr` (method)](#resultunwrapor-method)
+      - [`Result.andThen` (method)](#resultandthen-method)
+      - [`Result.asyncAndThen` (method)](#resultasyncandthen-method)
+      - [`Result.orElse` (method)](#resultorelse-method)
+      - [`Result.match` (method)](#resultmatch-method)
+      - [`Result.asyncMap` (method)](#resultasyncmap-method)
+      - [`Result.fromThrowable` (static class method)](#resultfromthrowable-static-class-method)
+      - [`Result.combine` (static class method)](#resultcombine-static-class-method)
+      - [`Result.combineWithAllErrors` (static class method)](#resultcombinewithallerrors-static-class-method)
+      - [`Result.safeUnwrap()`](#resultsafeunwrap)
+    - [Asynchronous API (`ResultAsync`)](#asynchronous-api-resultasync)
+      - [`okAsync`](#okasync)
+      - [`errAsync`](#errasync)
+      - [`ResultAsync.fromPromise` (static class method)](#resultasyncfrompromise-static-class-method)
+      - [`ResultAsync.fromSafePromise` (static class method)](#resultasyncfromsafepromise-static-class-method)
+      - [`ResultAsync.map` (method)](#resultasyncmap-method-1)
+      - [`ResultAsync.mapErr` (method)](#resultasyncmaperr-method)
+      - [`ResultAsync.unwrapOr` (method)](#resultasyncunwrapor-method)
+      - [`ResultAsync.andThen` (method)](#resultasyncandthen-method-1)
+      - [`ResultAsync.orElse` (method)](#resultasyncorelse-method)
+      - [`ResultAsync.match` (method)](#resultasyncmatch-method)
+      - [`ResultAsync.combine` (static class method)](#resultasynccombine-static-class-method)
+      - [`ResultAsync.combineWithAllErrors` (static class method)](#resultasynccombinewithallerrors-static-class-method)
+      - [`ResultAsync.safeUnwrap()`](#resultasyncsafeunwrap)
+    - [Utilities](#utilities)
+      - [`fromThrowable`](#fromthrowable)
+      - [`fromPromise`](#frompromise)
+      - [`fromSafePromise`](#fromsafepromise)
+      - [`$try`](#try)
+    - [Testing](#testing)
 
 ## Installation
 
 ```sh
-> npm install neverthrow
+> npm install errok
 ```
 
-## Recommended: Use `eslint-plugin-neverthrow`
+## Recommended: Use `eslint-plugin-errok`
 
-As part of `neverthrow`s [bounty program](https://github.com/supermacro/neverthrow/issues/314), user [mdbetancourt](https://github.com/mdbetancourt) created [`eslint-plugin-neverthrow`](https://github.com/mdbetancourt/eslint-plugin-neverthrow) to ensure that errors are not gone unhandled.
+The [`eslint-plugin-errok`](https://github.com/Tunnel-Labs/eslint-plugin-errok) plugin ensures errors are explicitly handled.
+
+> Full credit to user [@mdbetancourt](https://github.com/mdbetancourt) for creating the original [`eslint-plugin-neverthrow`](https://github.com/mdbetancourt/eslint-plugin-neverthrow) plugin that [`eslint-plugin-errok`](https://github.com/Tunnel-Labs/eslint-plugin-errok) is based on!
 
 Install by running:
 
 ```sh
-> npm install eslint-plugin-neverthrow
+> npm install eslint-plugin-errok
 ```
 
-With `eslint-plugin-neverthrow`, you are forced to consume the result in one of the following three ways:
+With `eslint-plugin-errok`, you are forced to consume the result in one of the following three ways:
 
 - Calling `.match`
 - Calling `.unwrapOr`
@@ -85,12 +89,12 @@ With `eslint-plugin-neverthrow`, you are forced to consume the result in one of 
 
 This ensures that you're explicitly handling the error of your `Result`.
 
-This plugin is essentially a porting of Rust's [`must-use`](https://doc.rust-lang.org/std/result/#results-must-be-used) attribute. 
+This plugin is essentially a porting of Rust's [`must-use`](https://doc.rust-lang.org/std/result/#results-must-be-used) attribute.
 
 
 ## Top-Level API
 
-`neverthrow` exposes the following:
+`errok` exposes the following:
 
 - `ok` convenience function to create an `Ok` variant of `Result`
 - `err` convenience function to create an `Err` variant of `Result`
@@ -114,13 +118,13 @@ import {
   fromThrowable,
   fromPromise,
   fromSafePromise,
-  safeTry,
-} from 'neverthrow'
+  $try,
+} from 'errok'
 ```
 
 ---
 
-**Check out the [wiki](https://github.com/supermacro/neverthrow/wiki) for help on how to make the most of `neverthrow`.**
+**Check out the [wiki](https://github.com/Tunnel-Labs/errok/wiki) for help on how to make the most of `errok`.**
 
 If you find this package useful, please consider [sponsoring me](https://github.com/sponsors/supermacro/) or simply [buying me a coffee](https://ko-fi.com/gdelgado)!
 
@@ -143,7 +147,7 @@ ok<T, E>(value: T): Ok<T, E> { ... }
 **Example:**
 
 ```typescript
-import { ok } from 'neverthrow'
+import { ok } from 'errok'
 
 const myResult = ok({ myData: 'test' }) // instance of `Ok`
 
@@ -168,7 +172,7 @@ err<T, E>(error: E): Err<T, E> { ... }
 **Example:**
 
 ```typescript
-import { err } from 'neverthrow'
+import { err } from 'errok'
 
 const myResult = err('Oh noooo') // instance of `Err`
 
@@ -336,7 +340,7 @@ class Result<T, E> {
 **Example 1: Chaining Results**
 
 ```typescript
-import { err, ok } from 'neverthrow'
+import { err, ok } from 'errok'
 
 const sq = (n: number): Result<number, number> => ok(n ** 2)
 
@@ -422,9 +426,9 @@ const updatedQueryResult = dbQueryResult.orElse((dbError) =>
     //
     // err() can be called with a value of any new type that you want
     // it could also be called with the same error value
-    //     
+    //
     //     err(dbError)
-    : err(500) 
+    : err(500)
 )
 ```
 
@@ -533,7 +537,7 @@ const asyncRes = parseHeaders(rawHeader)
 ```
 
 Note that in the above example if `parseHeaders` returns an `Err` then `.map` and `.asyncMap` will not be invoked, and `asyncRes` variable will resolve to an `Err` when turned into a `Result` using `await` or `.then()`.
-  
+
 [⬆️  Back to top](#toc)
 
 ---
@@ -556,7 +560,7 @@ map what is thrown to a known type.
 **Example**:
 
 ```typescript
-import { Result } from 'neverthrow'
+import { Result } from 'errok'
 
 type ParseError = { message: string }
 const toParseError = (): ParseError => ({ message: "Parse Error" })
@@ -664,7 +668,7 @@ const result = Result.combineWithAllErrors(resultList)
 
 #### `Result.safeUnwrap()`
 
-**⚠️ You must use `.safeUnwrap` in a generator context with `safeTry`**. Please see [safeTry](#safeTry).
+**⚠️ You must use `.safeUnwrap` in a generator context with `$try`**. Please see [$try](#$try).
 
 Allows for unwrapping a `Result` or returning an `Err` implicitly, thereby reducing boilerplate.
 
@@ -688,7 +692,7 @@ okAsync<T, E>(value: T): ResultAsync<T, E>
 **Example:**
 
 ```typescript
-import { okAsync } from 'neverthrow'
+import { okAsync } from 'errok'
 
 const myResultAsync = okAsync({ myData: 'test' }) // instance of `ResultAsync`
 
@@ -715,7 +719,7 @@ errAsync<T, E>(error: E): ResultAsync<T, E>
 **Example:**
 
 ```typescript
-import { errAsync } from 'neverthrow'
+import { errAsync } from 'errok'
 
 const myResultAsync = errAsync('Oh nooo') // instance of `ResultAsync`
 
@@ -741,7 +745,7 @@ The second argument handles the rejection case of the promise and maps the error
 ```typescript
 // fromPromise is a static class method
 // also available as a standalone function
-// import { fromPromise } from 'neverthrow'
+// import { fromPromise } from 'errok'
 ResultAsync.fromPromise<T, E>(
   promise: PromiseLike<T>,
   errorHandler: (unknownError: unknown) => E)
@@ -753,7 +757,7 @@ If you are working with `PromiseLike` objects that you **know for a fact** will 
 **Example**:
 
 ```typescript
-import { ResultAsync } from 'neverthrow'
+import { ResultAsync } from 'errok'
 import { insertIntoDb } from 'imaginary-database'
 // insertIntoDb(user: User): Promise<User>
 
@@ -774,7 +778,7 @@ Same as `ResultAsync.fromPromise` except that it does not handle the rejection o
 ```typescript
 // fromPromise is a static class method
 // also available as a standalone function
-// import { fromPromise } from 'neverthrow'
+// import { fromPromise } from 'errok'
 ResultAsync.fromSafePromise<T, E>(
   promise: PromiseLike<T>
 ): ResultAsync<T, E> { ... }
@@ -914,7 +918,7 @@ usersInCanada.then((usersResult: Result<Array<User>, string>) => {
 
 #### `ResultAsync.unwrapOr` (method)
 
-Unwrap the `Ok` value, or return the default if there is an `Err`.  
+Unwrap the `Ok` value, or return the default if there is an `Err`.
 Works just like `Result.unwrapOr` but returns a `Promise<T>` instead of `T`.
 
 **Signature:**
@@ -1140,7 +1144,7 @@ const result = ResultAsync.combineWithAllErrors(resultList)
 
 #### `ResultAsync.safeUnwrap()`
 
-**⚠️ You must use `.safeUnwrap` in a generator context with `safeTry`**. Please see [safeTry](#safeTry).
+**⚠️ You must use `.safeUnwrap` in a generator context with `$try`**. Please see [$try](#$try).
 
 Allows for unwrapping a `Result` or returning an `Err` implicitly, thereby reducing boilerplate.
 
@@ -1172,7 +1176,7 @@ Please find documentation at [ResultAsync.fromSafePromise](#resultasyncfromsafep
 [⬆️  Back to top](#toc)
 
 
-#### `safeTry`
+#### `$try`
 
 Used to implicityly return errors and reduce boilerplate.
 
@@ -1202,16 +1206,16 @@ function myFunc(): Result<number, string> {
 ```
 Basically, we need to define a constant for each result to check whether it's a `Ok` and read its `.value` or `.error`.
 
-With safeTry, we can state 'Return here if its an `Err`, otherwise unwrap it here and keep going.' in just one expression.
+With $try, we can state 'Return here if its an `Err`, otherwise unwrap it here and keep going.' in just one expression.
 ```typescript
 declare function mayFail1(): Result<number, string>;
 declare function mayFail2(): Result<number, string>;
 
 function myFunc(): Result<number, string> {
-    return safeTry<number, string>(function*() {
+    return $try<number, string>(function*() {
         return ok(
             // If the result of mayFail1().mapErr() is an `Err`, the evaluation is
-            // aborted here and the enclosing `safeTry` block is evaluated to that `Err`.
+            // aborted here and the enclosing `$try` block is evaluated to that `Err`.
             // Otherwise, this `(yield* ...)` is evaluated to its `.value`.
             (yield* mayFail1()
                 .mapErr(e => `aborted by an error from 1st function, ${e}`)
@@ -1226,19 +1230,19 @@ function myFunc(): Result<number, string> {
 }
 ```
 
-To use `safeTry`, the points are as follows.
+To use `$try`, the points are as follows.
 * Wrap the entire block in a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*)
 * In that block, you can use `yield* <RESULT>` to state 'Return `<RESULT>` if it's an `Err`, otherwise evaluate to its `.value`'
-* Pass the generator function to `safeTry`
+* Pass the generator function to `$try`
 
-You can also use [async generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function*) to pass an async block to `safeTry`.
+You can also use [async generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function*) to pass an async block to `$try`.
 ```typescript
 // You can use either Promise<Result> or ResultAsync.
 declare function mayFail1(): Promise<Result<number, string>>;
 declare function mayFail2(): ResultAsync<number, string>;
 
 function myFunc(): Promise<Result<number, string>> {
-    return safeTry<number, string>(async function*() {
+    return $try<number, string>(async function*() {
         return ok(
             // You have to await if the expression is Promise<Result>
             (yield* (await mayFail1())
@@ -1254,7 +1258,7 @@ function myFunc(): Promise<Result<number, string>> {
 }
 ```
 
-For more information, see https://github.com/supermacro/neverthrow/pull/448 and https://github.com/supermacro/neverthrow/issues/444
+For more information, see https://github.com/Tunnel-Labs/errok/pull/448 and https://github.com/Tunnel-Labs/errok/issues/444
 
 [⬆️  Back to top](#toc)
 
@@ -1277,14 +1281,14 @@ expect(myResult._unsafeUnwrap()).toBe(someExpectation)
 However, do note that `Result` instances are comparable. So you don't necessarily need to unwrap them in order to assert expectations in your tests. So you could also do something like this:
 
 ```typescript
-import { ok } from 'neverthrow'
+import { ok } from 'errok'
 
 // ...
 
 expect(callSomeFunctionThatReturnsAResult("with", "some", "args")).toEqual(ok(someExpectation));
 ```
 
-By default, the thrown value does not contain a stack trace. This is because stack trace generation [makes error messages in Jest harder to understand](https://github.com/supermacro/neverthrow/pull/215). If you want stack traces to be generated, call `_unsafeUnwrap` and / or `_unsafeUnwrapErr` with a config object:
+By default, the thrown value does not contain a stack trace. This is because stack trace generation [makes error messages in Jest harder to understand](https://github.com/Tunnel-Labs/errok/pull/215). If you want stack traces to be generated, call `_unsafeUnwrap` and / or `_unsafeUnwrapErr` with a config object:
 
 ```typescript
 _unsafeUnwrapErr({
@@ -1299,15 +1303,3 @@ _unsafeUnwrapErr({
 If you find this package useful, please consider [sponsoring me](https://github.com/sponsors/supermacro/) or simply [buying me a coffee](https://ko-fi.com/gdelgado)!
 
 ---
-
-## A note on the Package Name
-
-Although the package is called `neverthrow`, please don't take this literally. I am simply encouraging the developer to think a bit more about the ergonomics and usage of whatever software they are writing.
-
-`Throw`ing and `catching` is very similar to using `goto` statements - in other words; it makes reasoning about your programs harder. Secondly, by using `throw` you make the assumption that the caller of your function is implementing `catch`. This is a known source of errors. Example: One dev `throw`s and another dev uses the function without prior knowledge that the function will throw. Thus, and edge case has been left unhandled and now you have unhappy users, bosses, cats, etc.
-
-With all that said, there are definitely good use cases for throwing in your program. But much less than you might think.
-
-### License
-
-The neverthrow project is available as open source under the terms of the [MIT license](https://github.com/supermacro/neverthrow/blob/master/LICENSE).
