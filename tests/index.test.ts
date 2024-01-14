@@ -28,7 +28,7 @@ describe('Result.Ok', () => {
 
 		expect(okVal.isOk()).toBe(true);
 		expect(okVal.isErr()).toBe(false);
-		expect(okVal._unsafeUnwrap()).toBe(null);
+		expect(okVal.unwrapOrThrow()).toBe(null);
 	});
 
 	it('Creates an Ok value with undefined', () => {
@@ -36,7 +36,7 @@ describe('Result.Ok', () => {
 
 		expect(okVal.isOk()).toBe(true);
 		expect(okVal.isErr()).toBe(false);
-		expect(okVal._unsafeUnwrap()).toBeUndefined();
+		expect(okVal.unwrapOrThrow()).toBeUndefined();
 	});
 
 	it('Is comparable', () => {
@@ -51,7 +51,7 @@ describe('Result.Ok', () => {
 		const mapped = okVal.map(mapFn);
 
 		expect(mapped.isOk()).toBe(true);
-		expect(mapped._unsafeUnwrap()).toBe('12');
+		expect(mapped.unwrapOrThrow()).toBe('12');
 		expect(mapFn).toHaveBeenCalledTimes(1);
 	});
 
@@ -76,7 +76,7 @@ describe('Result.Ok', () => {
 			});
 
 			expect(flattened.isOk()).toBe(true);
-			expect(flattened._unsafeUnwrap()).toStrictEqual({ data: 'why not' });
+			expect(flattened.unwrapOrThrow()).toStrictEqual({ data: 'why not' });
 		});
 
 		it('Maps to an Err', () => {
@@ -131,7 +131,7 @@ describe('Result.Ok', () => {
 		const newResult = await flattened;
 
 		expect(newResult.isOk()).toBe(true);
-		expect(newResult._unsafeUnwrap()).toStrictEqual({ data: 'why not' });
+		expect(newResult.unwrapOrThrow()).toStrictEqual({ data: 'why not' });
 	});
 
 	it('Maps to a promise', async () => {
@@ -157,7 +157,7 @@ describe('Result.Ok', () => {
 
 		expect(newResult.isOk()).toBe(true);
 		expect(asyncMapper).toHaveBeenCalledTimes(1);
-		expect(newResult._unsafeUnwrap()).toStrictEqual('Very Nice!');
+		expect(newResult.unwrapOrThrow()).toStrictEqual('Very Nice!');
 	});
 
 	it('Matches on an Ok', () => {
@@ -174,7 +174,7 @@ describe('Result.Ok', () => {
 	it('Unwraps without issue', () => {
 		const okVal = ok(12);
 
-		expect(okVal._unsafeUnwrap()).toBe(12);
+		expect(okVal.unwrapOrThrow()).toBe(12);
 	});
 
 	it('Can read the value after narrowing', () => {
@@ -212,8 +212,8 @@ describe('Result.Err', () => {
 
 		expect(hopefullyNotMapped.isErr()).toBe(true);
 		expect(mapper).not.toHaveBeenCalled();
-		expect(hopefullyNotMapped._unsafeUnwrapErr()).toEqual(
-			errVal._unsafeUnwrapErr(),
+		expect(hopefullyNotMapped.unwrapOrThrowErr()).toEqual(
+			errVal.unwrapOrThrowErr(),
 		);
 	});
 
@@ -226,7 +226,7 @@ describe('Result.Err', () => {
 
 		expect(mapped.isErr()).toBe(true);
 		expect(mapper).toHaveBeenCalledTimes(1);
-		expect(mapped._unsafeUnwrapErr()).not.toEqual(errVal._unsafeUnwrapErr());
+		expect(mapped.unwrapOrThrowErr()).not.toEqual(errVal.unwrapOrThrowErr());
 	});
 
 	it('unwrapOr and return the default value', () => {
@@ -243,7 +243,7 @@ describe('Result.Err', () => {
 
 		expect(hopefullyNotFlattened.isErr()).toBe(true);
 		expect(mapper).not.toHaveBeenCalled();
-		expect(errVal._unsafeUnwrapErr()).toEqual('Yolo');
+		expect(errVal.unwrapOrThrowErr()).toEqual('Yolo');
 	});
 
 	it('Transforms error into ResultAsync within `asyncAndThen`', async () => {
@@ -257,7 +257,7 @@ describe('Result.Err', () => {
 		expect(asyncMapper).not.toHaveBeenCalled();
 
 		const syncResult = await hopefullyNotFlattened;
-		expect(syncResult._unsafeUnwrapErr()).toEqual('Yolo');
+		expect(syncResult.unwrapOrThrowErr()).toEqual('Yolo');
 	});
 
 	it('Does not invoke callback within `asyncMap`', async () => {
@@ -283,7 +283,7 @@ describe('Result.Err', () => {
 
 		expect(sameResult.isErr()).toBe(true);
 		expect(asyncMapper).not.toHaveBeenCalled();
-		expect(sameResult._unsafeUnwrapErr()).toEqual(errVal._unsafeUnwrapErr());
+		expect(sameResult.unwrapOrThrowErr()).toEqual(errVal.unwrapOrThrowErr());
 	});
 
 	it('Matches on an Err', () => {
@@ -301,14 +301,14 @@ describe('Result.Err', () => {
 		const errVal = err('woopsies');
 
 		expect(() => {
-			errVal._unsafeUnwrap();
+			errVal.unwrapOrThrow();
 		}).toThrowError();
 	});
 
 	it('Unwraps without issue', () => {
 		const okVal = err(12);
 
-		expect(okVal._unsafeUnwrapErr()).toBe(12);
+		expect(okVal.unwrapOrThrowErr()).toBe(12);
 	});
 
 	describe('orElse', () => {
@@ -331,7 +331,7 @@ describe('Result.fromThrowable', () => {
 		const safeResult = safeHello();
 
 		expect(safeResult).toBeInstanceOf(Ok);
-		expect(result).toEqual(safeResult._unsafeUnwrap());
+		expect(result).toEqual(safeResult.unwrapOrThrow());
 	});
 
 	// Added for issue #300 -- the test here is not so much that expectations are met as that the test compiles.
@@ -343,7 +343,7 @@ describe('Result.fromThrowable', () => {
 		const safeResult = safeHello('Dikembe');
 
 		expect(safeResult).toBeInstanceOf(Ok);
-		expect(result).toEqual(safeResult._unsafeUnwrap());
+		expect(result).toEqual(safeResult.unwrapOrThrow());
 	});
 
 	it('Creates a function that returns an err when the inner function throws', () => {
@@ -357,7 +357,7 @@ describe('Result.fromThrowable', () => {
 		const result = safeThrower();
 
 		expect(result).toBeInstanceOf(Err);
-		expect(result._unsafeUnwrapErr()).toBeInstanceOf(Error);
+		expect(result.unwrapOrThrowErr()).toBeInstanceOf(Error);
 	});
 
 	it('Accepts an error handler as a second argument', () => {
@@ -375,7 +375,7 @@ describe('Result.fromThrowable', () => {
 		expect(result.isOk()).toBe(false);
 		expect(result.isErr()).toBe(true);
 		expect(result).toBeInstanceOf(Err);
-		expect(result._unsafeUnwrapErr()).toEqual({ message: 'error' });
+		expect(result.unwrapOrThrowErr()).toEqual({ message: 'error' });
 	});
 
 	it('has a top level export', () => {
@@ -392,7 +392,7 @@ describe('Utils', () => {
 				const result = Result.combine(resultList);
 
 				expect(result.isOk()).toBe(true);
-				expect(result._unsafeUnwrap()).toEqual([123, 456, 789]);
+				expect(result.unwrapOrThrow()).toEqual([123, 456, 789]);
 			});
 
 			it('Combines a list of results into an Err value', () => {
@@ -406,7 +406,7 @@ describe('Utils', () => {
 				const result = Result.combine(resultList);
 
 				expect(result.isErr()).toBe(true);
-				expect(result._unsafeUnwrapErr()).toBe('boooom!');
+				expect(result.unwrapOrThrowErr()).toBe('boooom!');
 			});
 
 			it('Combines heterogeneous lists', () => {
@@ -429,7 +429,7 @@ describe('Utils', () => {
 
 				const result: ExpecteResult = Result.combine(heterogenousList);
 
-				expect(result._unsafeUnwrap()).toEqual(['Yooooo', 123, true]);
+				expect(result.unwrapOrThrow()).toEqual(['Yooooo', 123, true]);
 			});
 
 			it('Does not destructure / concatenate arrays', () => {
@@ -447,7 +447,7 @@ describe('Utils', () => {
 
 				const result: ExpectedResult = Result.combine(homogenousList);
 
-				expect(result._unsafeUnwrap()).toEqual([['hello', 'world'], [1, 2, 3]]);
+				expect(result.unwrapOrThrow()).toEqual([['hello', 'world'], [1, 2, 3]]);
 			});
 		});
 
@@ -464,7 +464,7 @@ describe('Utils', () => {
 				const result = await ResultAsync.combine(asyncResultList);
 
 				expect(result.isOk()).toBe(true);
-				expect(result._unsafeUnwrap()).toEqual([123, 456, 789]);
+				expect(result.unwrapOrThrow()).toEqual([123, 456, 789]);
 			});
 
 			it('Combines a list of results into an Err value', async () => {
@@ -478,7 +478,7 @@ describe('Utils', () => {
 				const result = await ResultAsync.combine(resultList);
 
 				expect(result.isErr()).toBe(true);
-				expect(result._unsafeUnwrapErr()).toBe('boooom!');
+				expect(result.unwrapOrThrowErr()).toBe('boooom!');
 			});
 
 			it('Combines heterogeneous lists', async () => {
@@ -505,7 +505,7 @@ describe('Utils', () => {
 					heterogenousList,
 				);
 
-				expect(result._unsafeUnwrap()).toEqual(['Yooooo', 123, true, [
+				expect(result.unwrapOrThrow()).toEqual(['Yooooo', 123, true, [
 					1,
 					2,
 					3,
@@ -521,7 +521,7 @@ describe('Utils', () => {
 				const result = Result.combineWithAllErrors(resultList);
 
 				expect(result.isOk()).toBe(true);
-				expect(result._unsafeUnwrap()).toEqual([123, 456, 789]);
+				expect(result.unwrapOrThrow()).toEqual([123, 456, 789]);
 			});
 
 			it('Combines a list of results into an Err value', () => {
@@ -535,7 +535,7 @@ describe('Utils', () => {
 				const result = Result.combineWithAllErrors(resultList);
 
 				expect(result.isErr()).toBe(true);
-				expect(result._unsafeUnwrapErr()).toEqual(['boooom!', 'ahhhhh!']);
+				expect(result.unwrapOrThrowErr()).toEqual(['boooom!', 'ahhhhh!']);
 			});
 
 			it('Combines heterogeneous lists', () => {
@@ -560,7 +560,7 @@ describe('Utils', () => {
 					heterogenousList,
 				);
 
-				expect(result._unsafeUnwrap()).toEqual(['Yooooo', 123, true]);
+				expect(result.unwrapOrThrow()).toEqual(['Yooooo', 123, true]);
 			});
 
 			it('Does not destructure / concatenate arrays', () => {
@@ -583,7 +583,7 @@ describe('Utils', () => {
 					homogenousList,
 				);
 
-				expect(result._unsafeUnwrap()).toEqual([['hello', 'world'], [1, 2, 3]]);
+				expect(result.unwrapOrThrow()).toEqual([['hello', 'world'], [1, 2, 3]]);
 			});
 		});
 		describe('`ResultAsync.combineWithAllErrors`', () => {
@@ -593,7 +593,7 @@ describe('Utils', () => {
 				const result = await ResultAsync.combineWithAllErrors(asyncResultList);
 
 				expect(result.isOk()).toBe(true);
-				expect(result._unsafeUnwrap()).toEqual([123, 456, 789]);
+				expect(result.unwrapOrThrow()).toEqual([123, 456, 789]);
 			});
 
 			it('Combines a list of results into an Err value', async () => {
@@ -607,7 +607,7 @@ describe('Utils', () => {
 				const result = await ResultAsync.combineWithAllErrors(asyncResultList);
 
 				expect(result.isErr()).toBe(true);
-				expect(result._unsafeUnwrapErr()).toEqual(['boooom!', 'ahhhhh!']);
+				expect(result.unwrapOrThrowErr()).toEqual(['boooom!', 'ahhhhh!']);
 			});
 
 			it('Combines heterogeneous lists', async () => {
@@ -632,7 +632,7 @@ describe('Utils', () => {
 					heterogenousList,
 				);
 
-				expect(result._unsafeUnwrap()).toEqual(['Yooooo', 123, true]);
+				expect(result.unwrapOrThrow()).toEqual(['Yooooo', 123, true]);
 			});
 		});
 
@@ -650,7 +650,7 @@ describe('Utils', () => {
 
 				expect(result).toBeDefined();
 				expect(result.isErr()).toBeFalsy();
-				const unwrappedResult = result._unsafeUnwrap();
+				const unwrappedResult = result.unwrapOrThrow();
 
 				expect(unwrappedResult.length).toBe(1);
 				expect(unwrappedResult[0]).toBe(mock);
@@ -668,7 +668,7 @@ describe('ResultAsync', () => {
 		const val = await asyncVal;
 
 		expect(val).toBeInstanceOf(Ok);
-		expect(val._unsafeUnwrap()).toEqual(12);
+		expect(val.unwrapOrThrow()).toEqual(12);
 
 		// For an error
 		const asyncErr = errAsync('Wrong format');
@@ -677,7 +677,7 @@ describe('ResultAsync', () => {
 		const err = await asyncErr;
 
 		expect(err).toBeInstanceOf(Err);
-		expect(err._unsafeUnwrapErr()).toEqual('Wrong format');
+		expect(err.unwrapOrThrowErr()).toEqual('Wrong format');
 	});
 
 	describe('acting as a Promise<Result>', () => {
@@ -712,7 +712,7 @@ describe('ResultAsync', () => {
 			expect(allResult[0]).toBeInstanceOf(Ok);
 			if (!(allResult[0] instanceof Ok)) return;
 			expect(allResult[0].isOk()).toBe(true);
-			expect(allResult[0]._unsafeUnwrap()).toEqual('1');
+			expect(allResult[0].unwrapOrThrow()).toEqual('1');
 		});
 
 		it('rejects if the underlying promise is rejected', () => {
@@ -734,7 +734,7 @@ describe('ResultAsync', () => {
 			const newVal = await mapped;
 
 			expect(newVal.isOk()).toBe(true);
-			expect(newVal._unsafeUnwrap()).toBe('12');
+			expect(newVal.unwrapOrThrow()).toBe('12');
 			expect(mapSyncFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -752,7 +752,7 @@ describe('ResultAsync', () => {
 			const newVal = await mapped;
 
 			expect(newVal.isOk()).toBe(true);
-			expect(newVal._unsafeUnwrap()).toBe('12');
+			expect(newVal.unwrapOrThrow()).toBe('12');
 			expect(mapAsyncFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -768,7 +768,7 @@ describe('ResultAsync', () => {
 			const newVal = await notMapped;
 
 			expect(newVal.isErr()).toBe(true);
-			expect(newVal._unsafeUnwrapErr()).toBe('Wrong format');
+			expect(newVal.unwrapOrThrowErr()).toBe('Wrong format');
 			expect(mapSyncFn).toHaveBeenCalledTimes(0);
 		});
 	});
@@ -786,7 +786,7 @@ describe('ResultAsync', () => {
 			const newVal = await mappedErr;
 
 			expect(newVal.isErr()).toBe(true);
-			expect(newVal._unsafeUnwrapErr()).toBe('Error: Wrong format');
+			expect(newVal.unwrapOrThrowErr()).toBe('Error: Wrong format');
 			expect(mapErrSyncFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -802,7 +802,7 @@ describe('ResultAsync', () => {
 			const newVal = await mappedErr;
 
 			expect(newVal.isErr()).toBe(true);
-			expect(newVal._unsafeUnwrapErr()).toBe('Error: Wrong format');
+			expect(newVal.unwrapOrThrowErr()).toBe('Error: Wrong format');
 			expect(mapErrAsyncFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -818,7 +818,7 @@ describe('ResultAsync', () => {
 			const newVal = await notMapped;
 
 			expect(newVal.isOk()).toBe(true);
-			expect(newVal._unsafeUnwrap()).toBe(12);
+			expect(newVal.unwrapOrThrow()).toBe(12);
 			expect(mapErrSyncFn).toHaveBeenCalledTimes(0);
 		});
 	});
@@ -836,7 +836,7 @@ describe('ResultAsync', () => {
 			const newVal = await mapped;
 
 			expect(newVal.isOk()).toBe(true);
-			expect(newVal._unsafeUnwrap()).toBe('good');
+			expect(newVal.unwrapOrThrow()).toBe('good');
 			expect(andThenResultAsyncFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -852,7 +852,7 @@ describe('ResultAsync', () => {
 			const newVal = await mapped;
 
 			expect(newVal.isOk()).toBe(true);
-			expect(newVal._unsafeUnwrap()).toBe('good');
+			expect(newVal.unwrapOrThrow()).toBe('good');
 			expect(andThenResultFn).toHaveBeenCalledTimes(1);
 		});
 
@@ -868,7 +868,7 @@ describe('ResultAsync', () => {
 			const newVal = await notMapped;
 
 			expect(newVal.isErr()).toBe(true);
-			expect(newVal._unsafeUnwrapErr()).toBe('Wrong format');
+			expect(newVal.unwrapOrThrowErr()).toBe('Wrong format');
 			expect(andThenResultFn).toHaveBeenCalledTimes(0);
 		});
 	});
@@ -952,7 +952,7 @@ describe('ResultAsync', () => {
 
 			const val = await res;
 			expect(val.isOk()).toBe(true);
-			expect(val._unsafeUnwrap()).toEqual(12);
+			expect(val.unwrapOrThrow()).toEqual(12);
 		});
 
 		it('has a top level export', () => {
@@ -971,7 +971,7 @@ describe('ResultAsync', () => {
 
 			const val = await res;
 			expect(val.isErr()).toBe(true);
-			expect(val._unsafeUnwrapErr()).toEqual(Error('Oops: No!'));
+			expect(val.unwrapOrThrowErr()).toEqual(Error('Oops: No!'));
 		});
 
 		it('has a top level export', () => {
@@ -988,7 +988,7 @@ describe('ResultAsync', () => {
 			const res = await val;
 
 			expect(res.isOk()).toBe(true);
-			expect(res._unsafeUnwrap()).toEqual(12);
+			expect(res.unwrapOrThrow()).toEqual(12);
 		});
 	});
 
@@ -1001,7 +1001,7 @@ describe('ResultAsync', () => {
 			const res = await err;
 
 			expect(res.isErr()).toBe(true);
-			expect(res._unsafeUnwrapErr()).toEqual('bad');
+			expect(res.unwrapOrThrowErr()).toEqual('bad');
 		});
 	});
 });

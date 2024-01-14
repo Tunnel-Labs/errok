@@ -187,8 +187,8 @@ export class ResultAsync<T, E> implements PromiseLike<Result<T, E>> {
 		return yield* await this._promise.then((res) => res.safeUnwrap());
 	}
 
-	async _unsafeUnwrap() {
-		return this._promise.then((res) => res._unsafeUnwrap());
+	async unwrapOrThrow() {
+		return this._promise.then((res) => res.unwrapOrThrow());
 	}
 
 	// Makes ResultAsync implement PromiseLike<Result>

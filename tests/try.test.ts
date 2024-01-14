@@ -18,7 +18,7 @@ describe('Returns what is returned from the generator function', () => {
 			return ok(val);
 		});
 		expect(res).toBeInstanceOf(Ok);
-		expect(res._unsafeUnwrap()).toBe(val);
+		expect(res.unwrapOrThrow()).toBe(val);
 	});
 
 	test('With synchronous Err', () => {
@@ -26,7 +26,7 @@ describe('Returns what is returned from the generator function', () => {
 			return err(val);
 		});
 		expect(res).toBeInstanceOf(Err);
-		expect(res._unsafeUnwrapErr()).toBe(val);
+		expect(res.unwrapOrThrowErr()).toBe(val);
 	});
 
 	test('With async Ok', async () => {
@@ -34,7 +34,7 @@ describe('Returns what is returned from the generator function', () => {
 			return await okAsync(val);
 		});
 		expect(res).toBeInstanceOf(Ok);
-		expect(res._unsafeUnwrap()).toBe(val);
+		expect(res.unwrapOrThrow()).toBe(val);
 	});
 
 	test('With async Err', async () => {
@@ -42,7 +42,7 @@ describe('Returns what is returned from the generator function', () => {
 			return await errAsync(val);
 		});
 		expect(res).toBeInstanceOf(Err);
-		expect(res._unsafeUnwrapErr()).toBe(val);
+		expect(res.unwrapOrThrowErr()).toBe(val);
 	});
 });
 
@@ -66,7 +66,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
 		expect(okValues).toMatchObject(['foo', 'bar']);
 
 		expect(result).toBeInstanceOf(Err);
-		expect(result._unsafeUnwrapErr()).toBe(errVal);
+		expect(result.unwrapOrThrowErr()).toBe(errVal);
 	});
 
 	test('With async results', async () => {
@@ -88,7 +88,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
 		expect(okValues).toMatchObject(['foo', 'bar']);
 
 		expect(result).toBeInstanceOf(Err);
-		expect(result._unsafeUnwrapErr()).toBe(errVal);
+		expect(result.unwrapOrThrowErr()).toBe(errVal);
 	});
 
 	test('Mix results of synchronous and async in AsyncGenerator', async () => {
@@ -110,7 +110,7 @@ describe("Returns the first occurence of Err instance as yiled*'s operand", () =
 		expect(okValues).toMatchObject(['foo', 'bar']);
 
 		expect(result).toBeInstanceOf(Err);
-		expect(result._unsafeUnwrapErr()).toBe(errVal);
+		expect(result.unwrapOrThrowErr()).toBe(errVal);
 	});
 });
 
@@ -152,7 +152,7 @@ describe("Tests if README's examples work", () => {
 
 		const result = myFunc();
 		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(`2nd, ${errValue}`);
+		expect(result.unwrapOrThrowErr()).toBe(`2nd, ${errValue}`);
 	});
 
 	test('all ok', () => {
@@ -171,7 +171,7 @@ describe("Tests if README's examples work", () => {
 
 		const result = myFunc();
 		expect(result.isOk()).toBe(true);
-		expect(result._unsafeUnwrap()).toBe(okValue + okValue);
+		expect(result.unwrapOrThrow()).toBe(okValue + okValue);
 	});
 
 	test('async mayFail1 error', async () => {
@@ -190,7 +190,7 @@ describe("Tests if README's examples work", () => {
 
 		const result = await myFunc();
 		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(`1st, ${errValue}`);
+		expect(result.unwrapOrThrowErr()).toBe(`1st, ${errValue}`);
 	});
 
 	test('async mayFail2 error', async () => {
@@ -209,7 +209,7 @@ describe("Tests if README's examples work", () => {
 
 		const result = await myFunc();
 		expect(result.isErr()).toBe(true);
-		expect(result._unsafeUnwrapErr()).toBe(`2nd, ${errValue}`);
+		expect(result.unwrapOrThrowErr()).toBe(`2nd, ${errValue}`);
 	});
 
 	test('promise async all ok', async () => {
@@ -228,6 +228,6 @@ describe("Tests if README's examples work", () => {
 
 		const result = await myFunc();
 		expect(result.isOk()).toBe(true);
-		expect(result._unsafeUnwrap()).toBe(okValue + okValue);
+		expect(result.unwrapOrThrow()).toBe(okValue + okValue);
 	});
 });

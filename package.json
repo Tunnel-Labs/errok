@@ -1,7 +1,7 @@
 {
 	"name": "errok",
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Type-safe error handling",
 	"exports": {
 		"require": {

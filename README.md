@@ -138,7 +138,7 @@ With `eslint-plugin-errok`, you are forced to consume the result in one of the f
 
 - Calling `.match`
 - Calling `.unwrapOr`
-- Calling `._unsafeUnwrap`
+- Calling `.unwrapOrThrow`
 
 This ensures that you're explicitly handling the error of your `Result`.
 
@@ -1325,16 +1325,16 @@ For more information, see https://github.com/Tunnel-Labs/errok/pull/448 and http
 
 ### Testing
 
-`Result` instances have two unsafe methods, aptly called `_unsafeUnwrap` and `_unsafeUnwrapErr` which **should only be used in a test environment**.
+`Result` instances have two unsafe methods, aptly called `unwrapOrThrow` and `unwrapOrThrowErr` which **should only be used in a test environment**.
 
-`_unsafeUnwrap` takes a `Result<T, E>` and returns a `T` when the result is an `Ok`, otherwise it throws a custom object.
+`unwrapOrThrow` takes a `Result<T, E>` and returns a `T` when the result is an `Ok`, otherwise it throws a custom object.
 
-`_unsafeUnwrapErr` takes a `Result<T, E>` and returns a `E` when the result is an `Err`, otherwise it throws a custom object.
+`unwrapOrThrowErr` takes a `Result<T, E>` and returns a `E` when the result is an `Err`, otherwise it throws a custom object.
 
 That way you can do something like:
 
 ```typescript
-expect(myResult._unsafeUnwrap()).toBe(someExpectation);
+expect(myResult.unwrapOrThrow()).toBe(someExpectation);
 ```
 
 However, do note that `Result` instances are comparable. So you don't necessarily need to unwrap them in order to assert expectations in your tests. So you could also do something like this:
@@ -1349,10 +1349,10 @@ expect(callSomeFunctionThatReturnsAResult('with', 'some', 'args')).toEqual(
 );
 ```
 
-By default, the thrown value does not contain a stack trace. This is because stack trace generation [makes error messages in Jest harder to understand](https://github.com/Tunnel-Labs/errok/pull/215). If you want stack traces to be generated, call `_unsafeUnwrap` and / or `_unsafeUnwrapErr` with a config object:
+By default, the thrown value does not contain a stack trace. This is because stack trace generation [makes error messages in Jest harder to understand](https://github.com/Tunnel-Labs/errok/pull/215). If you want stack traces to be generated, call `unwrapOrThrow` and / or `unwrapOrThrowErr` with a config object:
 
 ```typescript
-_unsafeUnwrapErr({
+unwrapOrThrowErr({
   withStackTrace: true,
 });
 

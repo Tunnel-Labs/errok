@@ -274,7 +274,7 @@ interface IResult<T, E> {
 	 *
 	 * @param config
 	 */
-	_unsafeUnwrap(config?: ErrorConfig): T;
+	unwrapOrThrow(config?: ErrorConfig): T;
 
 	/**
 	 * **This method is unsafe, and should only be used in a test environments**
@@ -284,7 +284,7 @@ interface IResult<T, E> {
 	 *
 	 * @param config
 	 */
-	_unsafeUnwrapErr(config?: ErrorConfig): E;
+	unwrapOrThrowErr(config?: ErrorConfig): E;
 }
 
 export class Ok<T, E> implements IResult<T, E> {
@@ -351,13 +351,13 @@ export class Ok<T, E> implements IResult<T, E> {
 		})();
 	}
 
-	_unsafeUnwrap(_?: ErrorConfig): T {
+	unwrapOrThrow(_?: ErrorConfig): T {
 		return this.value;
 	}
 
-	_unsafeUnwrapErr(config?: ErrorConfig): E {
+	unwrapOrThrowErr(config?: ErrorConfig): E {
 		throw createNeverThrowError(
-			'Called `_unsafeUnwrapErr` on an Ok',
+			'Called `unwrapOrThrowErr` on an Ok',
 			this,
 			config,
 		);
@@ -429,11 +429,11 @@ export class Err<T, E> implements IResult<T, E> {
 		})();
 	}
 
-	_unsafeUnwrap(_?: ErrorConfig): T {
+	unwrapOrThrow(_?: ErrorConfig): T {
 		throw this.error;
 	}
 
-	_unsafeUnwrapErr(_?: ErrorConfig): E {
+	unwrapOrThrowErr(_?: ErrorConfig): E {
 		return this.error;
 	}
 }
