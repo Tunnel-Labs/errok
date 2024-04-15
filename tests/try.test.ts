@@ -8,7 +8,7 @@ import {
 	okAsync,
 	Result,
 	ResultAsync,
-} from '../src';
+} from '../exports/main';
 
 describe('Returns what is returned from the generator function', () => {
 	const val = 'value';

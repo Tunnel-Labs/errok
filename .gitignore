@@ -1,4 +1,3 @@
-dist/
-tmp/
 node_modules/
-publish.sh
+.build
+.DS_Store

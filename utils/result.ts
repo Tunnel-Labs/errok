@@ -1,4 +1,6 @@
-import { createNeverThrowError, ErrorConfig } from './_internals/error.js';
+import type { IsUnknown } from '#types';
+import { createNeverThrowError, ErrorConfig } from '#utils/error.ts';
+import { errAsync, ResultAsync } from '#utils/result-async.ts';
 import {
 	combineResultList,
 	combineResultListWithAllErrors,
@@ -6,8 +8,7 @@ import {
 	ExtractOkTypes,
 	InferErrTypes,
 	InferOkTypes,
-} from './_internals/utils.js';
-import { errAsync, ResultAsync } from './result-async.js';
+} from '#utils/utils.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Result {
@@ -23,6 +24,7 @@ export namespace Result {
 		fn: Fn,
 		errorFn?: (e: unknown) => E,
 	): (...args: Parameters<Fn>) => Result<ReturnType<Fn>, E> {
+			// @ts-expect-error: works
 		return (...args) => {
 			try {
 				const result = fn(...args);
@@ -76,8 +78,8 @@ export namespace Result {
 export type Result<T, E> = Ok<T, E> | Err<T, E>;
 
 export const ok: {
-	<T, E = never>(value: T): Ok<T, E>
-	<T extends undefined, E = never>(): Ok<T, E>
+	<T, E = never>(value: T): Ok<T, E>;
+	<T extends undefined, E = never>(): Ok<T, E>;
 } = (value?: any) => new Ok(value);
 
 export const err = <T = never, E = unknown>(err: E): Err<T, E> => new Err(err);
@@ -105,7 +107,10 @@ export function $try<$Generator extends Generator>(
 	) => $Generator,
 ): $Generator extends
 	Generator<Result<infer $Ok1, infer $Err1>, Result<infer $Ok2, infer $Err2>> ?
-	Result<$Ok1 | $Ok2, $Err1 | $Err2> :
+	Result<
+		(IsUnknown<$Ok1> extends true ? never : $Ok1) | $Ok2,
+		(IsUnknown<$Err1> extends true ? never : $Err1) | $Err2
+	> :
 	TryUsageError<
 		'The generator passed to \`$try\` must only return and yield `Result` types.'
 	>;
