@@ -16,15 +16,10 @@
 			"default": "./.build/main.mjs"
 		}
 	},
-	"imports": {
-		"#utils/*": "./utils/*",
-		"#types": "./types/_.ts"
-	},
 	"files": [".build"],
 	"scripts": {
 		"format": "dprint fmt",
 		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf ./.build",
 		"build": "unbuild"
 	},
 	"repository": {

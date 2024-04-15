@@ -1,7 +1,6 @@
 {
 	"extends": "@tunnel/tsconfig",
 	"compilerOptions": {
-		"outDir": ".build",
 		"rootDir": "."
 	},
 	"include": [

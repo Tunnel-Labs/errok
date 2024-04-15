@@ -1,6 +1,6 @@
-import type { IsUnknown } from '#types';
-import { createNeverThrowError, ErrorConfig } from '#utils/error.ts';
-import { errAsync, ResultAsync } from '#utils/result-async.ts';
+import type { IsUnknown } from '../types/_.ts';
+import { createNeverThrowError, ErrorConfig } from '../utils/error.ts';
+import { errAsync, ResultAsync } from '../utils/result-async.ts';
 import {
 	combineResultList,
 	combineResultListWithAllErrors,
@@ -8,7 +8,7 @@ import {
 	ExtractOkTypes,
 	InferErrTypes,
 	InferOkTypes,
-} from '#utils/utils.ts';
+} from '../utils/utils.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Result {

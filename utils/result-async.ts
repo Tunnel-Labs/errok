@@ -6,8 +6,8 @@ import type {
 	MemberListOf,
 	MembersToUnion,
 	Traverse,
-} from '#utils/result.ts';
-import { Err, Ok, Result } from '#utils/result.ts';
+} from '../utils/result.ts';
+import { Err, Ok, Result } from '../utils/result.ts';
 import {
 	combineResultAsyncList,
 	combineResultAsyncListWithAllErrors,
@@ -19,7 +19,7 @@ import {
 	InferAsyncOkTypes,
 	InferErrTypes,
 	InferOkTypes,
-} from '#utils/utils.ts';
+} from '../utils/utils.ts';
 
 export class ResultAsync<T, E> implements PromiseLike<Result<T, E>> {
 	private _promise: Promise<Result<T, E>>;

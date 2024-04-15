@@ -1,5 +1,5 @@
-import { ResultAsync } from '#utils/result-async.ts';
-import { err, ok, Result } from '#utils/result.ts';
+import { ResultAsync } from '../utils/result-async.ts';
+import { err, ok, Result } from '../utils/result.ts';
 
 // Given a list of Results, this extracts all the different `T` types from that list
 export type ExtractOkTypes<T extends readonly Result<unknown, unknown>[]> = {
