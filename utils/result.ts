@@ -24,7 +24,7 @@ export namespace Result {
 		fn: Fn,
 		errorFn?: (e: unknown) => E,
 	): (...args: Parameters<Fn>) => Result<ReturnType<Fn>, E> {
-			// @ts-expect-error: works
+		// @ts-expect-error: works
 		return (...args) => {
 			try {
 				const result = fn(...args);
@@ -138,7 +138,10 @@ export function $try<$AsyncGenerator extends AsyncGenerator>(
 ): $AsyncGenerator extends AsyncGenerator<
 	Result<infer $Ok1, infer $Err1>,
 	Result<infer $Ok2, infer $Err2>
-> ? ResultAsync<$Ok1 | $Ok2, $Err1 | $Err2> :
+> ? ResultAsync<
+		(IsUnknown<$Ok1> extends true ? never : $Ok1) | $Ok2,
+		(IsUnknown<$Err1> extends true ? never : $Err1) | $Err2
+	> :
 	TryUsageError<
 		'The async generator passed to \`$try\` must only yield and return result types.'
 	>;
