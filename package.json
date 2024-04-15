@@ -1,7 +1,7 @@
 {
 	"name": "errok",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Type-safe error handling",
 	"main": "./.build/main.cjs",
 	"module": "./.build/main.mjs",
